@@ -4,5 +4,21 @@ services:
     build: .
     ports:
     - 80:5000
+    environment:
+      - OPA_ADDR=http://opa:8181
+      - POLICY_PATH=/v1/data/httpapi/authz
     volumes:
     - .:/app
+  opa:
+    image: openpolicyagent/opa:latest
+    ports:
+      - 8181:8181
+    command:
+      - "run"
+      - "--server"
+      - "--log-format=json-pretty"
+      - "--set=decision_logs.console=true"
+      - "--log-level=debug"
+      - "api_authz.rego"
+    volumes:
+      - ./policy/api_authz.rego:/api_authz.rego
