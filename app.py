@@ -1,13 +1,12 @@
+import json
+import logging
 import os
+import sys
 
-from flask import Flask, request, render_template
+import requests
+from flask import Flask, render_template, request
 from user_agents import parse
 
-import json
-import requests
-
-import logging
-import sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 app = Flask(__name__)
@@ -15,36 +14,39 @@ app = Flask(__name__)
 opa_url = os.environ.get("OPA_ADDR", "http://localhost:8181")
 policy_path = os.environ.get("POLICY_PATH", "/v1/data/httpapi/authz")
 
-def check_auth(url, method, device_brand):
-    input_dict = {"input": {
-        "device": device_brand,
-        "method": method,
-    }}
+
+def check_auth(url, method, device_os_family):
+    input_dict = {"input": {"os_family": device_os_family, "method": method,}}
 
     logging.info("Checking auth...")
     logging.info(json.dumps(input_dict, indent=2))
 
     try:
-        rsp = requests.post(url, data=json.dumps(input_dict))
+        r = requests.post(url, json=input_dict)
+        r.raise_for_status()
     except Exception as err:
         logging.info(err)
         return {}
-    if rsp.status_code >= 300:
+
+    if r.status_code >= 300:
         return {}
-    j = rsp.json()
+
     logging.info("Auth response:")
-    logging.info(json.dumps(j, indent=2))
-    return j
+    logging.info(json.dumps(r.json(), indent=2))
+    return r.json()
+
 
 @app.route("/")
 def root():
-    device_brand = parse(request.headers.get('User-Agent')).device.brand
+    device_os_family = parse(request.headers.get("User-Agent")).os.family
+    print(parse(request.headers.get("User-Agent")))
     url = opa_url + policy_path
 
-    j = check_auth(url, request.method, device_brand).get("result", {})
+    j = check_auth(url, request.method, device_os_family).get("result", {})
     if j.get("allow", False) == True:
-        return render_template('index.html', result="https://i.imgur.com/O1VyTHW.mp4")
-    return render_template('index.html', result="https://i.imgur.com/DKUR9Tk.png")
-    
+        return render_template("index.html", result="https://i.imgur.com/O1VyTHW.mp4")
+    return render_template("index.html", result="https://i.imgur.com/DKUR9Tk.png")
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run(host="0.0.0.0")
