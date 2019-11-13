@@ -13,5 +13,5 @@ default allow = false
 # if they use the following os_family.
 allow {
   input.method = "GET"
-  input.os_family == "Apple"
+  input.os_family == "Android"
 }
