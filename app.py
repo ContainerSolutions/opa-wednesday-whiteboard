@@ -15,8 +15,8 @@ opa_url = os.environ.get("OPA_ADDR", "http://localhost:8181")
 policy_path = os.environ.get("POLICY_PATH", "/v1/data/httpapi/authz")
 
 
-def check_auth(url, method, device_brand):
-    input_dict = {"input": {"device": device_brand, "method": method,}}
+def check_auth(url, method, device_os_family):
+    input_dict = {"input": {"os_family": device_os_family, "method": method,}}
 
     logging.info("Checking auth...")
     logging.info(json.dumps(input_dict, indent=2))
@@ -38,11 +38,11 @@ def check_auth(url, method, device_brand):
 
 @app.route("/")
 def root():
-    device_brand = parse(request.headers.get("User-Agent")).device.brand
+    device_os_family = parse(request.headers.get("User-Agent")).os.family
     print(parse(request.headers.get("User-Agent")))
     url = opa_url + policy_path
 
-    j = check_auth(url, request.method, device_brand).get("result", {})
+    j = check_auth(url, request.method, device_os_family).get("result", {})
     if j.get("allow", False) == True:
         return render_template("index.html", result="https://i.imgur.com/O1VyTHW.mp4")
     return render_template("index.html", result="https://i.imgur.com/DKUR9Tk.png")
