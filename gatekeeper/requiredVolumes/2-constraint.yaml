@@ -13,4 +13,4 @@ spec:
     # - emptyDir
     - secret
     - persistentVolumeClaim
-    #- hostPath #required for allowedHostPaths
+    - hostPath
