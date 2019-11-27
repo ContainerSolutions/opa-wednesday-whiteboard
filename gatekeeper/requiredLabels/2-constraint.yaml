@@ -1,0 +1,17 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: RequiredLabels
+metadata:
+  name: all-must-have-app-maintainer
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    message: "All pods must have an `maintainer` label that points to your company username and they must have a STANDARD 'app' label"
+    #         in order to know who to contact regarding a specific deployment                   for unified deeclaration of labels tied to services across the cluster
+    labels:
+      - key: maintainer
+        allowedRegex: "^[a-zA-Z]+.demo$"
+      # - key: app
+      #   allowedRegex: "^[a-zA-Z]+$"

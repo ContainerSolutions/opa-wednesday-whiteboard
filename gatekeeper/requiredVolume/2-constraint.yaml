@@ -1,0 +1,16 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: AllowedVolumeTypes
+metadata:
+  name: allowed-volume-types
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+  parameters:
+    volumes:
+    - configMap
+    # - emptyDir
+    - secret
+    - persistentVolumeClaim
+    #- hostPath #required for allowedHostPaths
