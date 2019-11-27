@@ -13,5 +13,5 @@ spec:
     labels:
       - key: maintainer
         allowedRegex: "^[a-zA-Z]+.demo$"
-      # - key: app
-      #   allowedRegex: "^[a-zA-Z]+$"
+      - key: app
+        allowedRegex: "^[a-zA-Z]+$"
